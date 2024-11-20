@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>User Management</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <style>
+        .navbar {
+            background-color: #343a40; /* Dark gray background */
+        }
+
+        .navbar-brand {
+            color: #ffffff; /* White text */
+        }
+
+        .navbar-nav .nav-link {
+            color: #ffffff; /* White text */
+        }
+
+        .user-list {
+            margin-top: 20px;
+        }
+
+        .user-table th,
+        .user-table td {
+            vertical-align: middle;
+        }
+    </style>
+</head>
+
+<body>
+    <%- include('./header.ejs') %>
+    <div class="container">
+        <h2 class="mt-4">User Management</h2>
+
+        <!-- User List -->
+        <div class="user-list">
+            <table class="table table-bordered user-table">
+                <thead class="thead-dark">
+                    <tr>
+                        <th scope="col">Username</th>
+                        <th scope="col">Role</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Password</th>
+                        <th scope="col">Creation Time</th>
+                        <th scope="col">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% users.forEach(user => { %>
+                        <tr>
+                            <td><%= user.username %></td>
+                            <td><%= user.role %></td>
+                            <td><%= user.isBanned ? 'Frozen' : 'Active' %></td>
+                            <td><%= user.password %></td>
+                            <td><%= user.createdAt.toLocaleString() %></td>
+                            <td>
+                                <form action="/admin/users/<%= user._id %>/reset-password" method="POST" style="display: inline;">
+                                    <button type="submit" class="btn btn-sm btn-info">Reset Password</button>
+                                </form>
+                                <% if (user.role === 'admin') { %>
+                                    <button class="btn btn-sm btn-secondary" disabled>Freeze</button>
+                                <% } else { %>
+                                    <form action="/admin/users/<%= user._id %>/freeze" method="POST" style="display: inline;">
+                                        <button type="submit" class="btn btn-sm btn-warning">Freeze</button>
+                                    </form>
+                                <% } %>
+                            </td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+
+            <!-- Pagination -->
+            <nav aria-label="Page navigation example">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item <%= currentPage == 1 ? 'disabled' : '' %>">
+                        <a class="page-link" href="?page=<%= currentPage - 1 %>" tabindex="-1" aria-disabled="true">Previous</a>
+                    </li>
+                    <% for (let i = 1; i <= totalPages; i++) { %>
+                        <li class="page-item <%= currentPage == i ? 'active' : '' %>">
+                            <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                        </li>
+                    <% } %>
+                    <li class="page-item <%= currentPage == totalPages ? 'disabled' : '' %>">
+                        <a class="page-link" href="?page=<%= currentPage + 1 %>">Next</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Bootstrap JavaScript and jQuery -->
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/popper.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+</body>
+
+</html>

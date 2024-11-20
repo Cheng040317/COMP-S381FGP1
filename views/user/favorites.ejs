@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>My Favorites</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <style>
+        .container {
+            margin-top: 50px;
+        }
+
+        .favorite-list {
+            margin-top: 20px;
+        }
+
+        .favorite-list .card {
+            margin-bottom: 20px;
+        }
+
+        .navbar {
+            background-color: #343a40;
+        }
+
+        .navbar-brand,
+        .navbar-nav .nav-link {
+            color: #ffffff;
+        }
+    </style>
+</head>
+
+<body>
+    <%- include('./header.ejs') %>
+    <div class="container" style="min-height: 800px;">
+        <h2 class="mt-4">My Favorites</h2>
+        <div class="favorite-list">
+            <% if (favorites.length > 0) { %>
+                <% favorites.forEach(favorite => { %>
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <%= favorite.blog.title %>
+                            </h5>
+                            <p class="card-text">
+                                <%= favorite.blog.content.substring(0, 150) %>...
+                            </p>
+                            <a href="/blogs/<%= favorite.blog._id %>" class="btn btn-primary">Read More</a>
+                            <form action="/favorites/<%= favorite._id %>/unfavorite" method="POST" class="d-inline">
+                                <button type="submit" class="btn btn-danger">Unfavorite</button>
+                            </form>
+                        </div>
+                    </div>
+                <% }) %>
+                <!-- Pagination -->
+                <nav aria-label="Page navigation example">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item <%= currentPage == 1 ? 'disabled' : '' %>">
+                            <a class="page-link" href="?page=<%= currentPage - 1 %>" tabindex="-1">Previous</a>
+                        </li>
+                        <% for (let i = 1; i <= totalPages; i++) { %>
+                            <li class="page-item <%= currentPage == i ? 'active' : '' %>">
+                                <a class="page-link" href="?page=<%= i %>">
+                                    <%= i %>
+                                </a>
+                            </li>
+                        <% } %>
+                        <li class="page-item <%= currentPage == totalPages ? 'disabled' : '' %>">
+                            <a class="page-link" href="?page=<%= currentPage + 1 %>">Next</a>
+                        </li>
+                    </ul>
+                </nav>
+            <% } else { %>
+                <p>No favorites yet</p>
+            <% } %>
+        </div>
+    </div>
+    <%- include('./footer.ejs') %>
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/popper.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+</body>
+
+</html>

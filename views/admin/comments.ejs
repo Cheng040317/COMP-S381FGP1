@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Comment Management</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <style>
+        .navbar {
+            background-color: #343a40; /* Dark gray background */
+        }
+
+        .navbar-brand,
+        .navbar-nav .nav-link {
+            color: #ffffff; /* White text */
+        }
+
+        .comment-list {
+            margin-top: 20px;
+        }
+
+        .comment-table th,
+        .comment-table td {
+            vertical-align: middle;
+        }
+    </style>
+</head>
+
+<body>
+    <%- include('./header.ejs') %>
+    <div class="container">
+        <h2 class="mt-4">Comment Management</h2>
+
+        <!-- Comment List -->
+        <div class="comment-list">
+            <table class="table table-bordered comment-table">
+                <thead class="thead-dark">
+                    <tr>
+                        <th scope="col">Comment Content</th>
+                        <th scope="col">Related Blog</th>
+                        <th scope="col">Comment User</th>
+                        <th scope="col">Comment Time</th>
+                        <th scope="col">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (comments.length > 0) { %>
+                        <% comments.forEach(comment => { %>
+                            <tr>
+                                <td><%= comment.content %></td>
+                                <td><%= comment.blog.title %></td>
+                                <td><%= comment.user.username %></td>
+                                <td><%= comment.createdAt.toLocaleString() %></td>
+                                <td>
+                                    <form action="/admin/comments/<%= comment._id %>/delete" method="POST" style="display: inline;">
+                                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="5" class="text-center">No comments available</td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+
+            <!-- Pagination -->
+            <nav aria-label="Page navigation example">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item <%= current == 1 ? 'disabled' : '' %>">
+                        <a class="page-link" href="?page=<%= current - 1 %>" tabindex="-1" aria-disabled="true">Previous</a>
+                    </li>
+                    <% for (let i = 1; i <= pages; i++) { %>
+                        <li class="page-item <%= current == i ? 'active' : '' %>">
+                            <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                        </li>
+                    <% } %>
+                    <li class="page-item <%= current == pages || comments.length === 0 ? 'disabled' : '' %>">
+                        <a class="page-link" href="?page=<%= current + 1 %>">Next</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Bootstrap JavaScript and jQuery -->
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/popper.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+</body>
+
+</html>

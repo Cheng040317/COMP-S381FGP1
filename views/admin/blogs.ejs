@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Blog Management</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <style>
+        .navbar {
+            background-color: #343a40;
+        }
+
+        .navbar-brand,
+        .navbar-nav .nav-link {
+            color: #ffffff;
+        }
+
+        .blog-list {
+            margin-top: 20px;
+        }
+
+        .blog-table th,
+        .blog-table td {
+            vertical-align: middle;
+        }
+    </style>
+</head>
+
+<body>
+    <%- include('./header.ejs') %>
+    <div class="container">
+        <h2 class="mt-4">Blog Management</h2>
+
+        <!-- Add Blog Button -->
+        <button class="btn btn-primary mb-3" data-toggle="modal" data-target="#blogModal">Add Blog</button>
+
+        <!-- Blog List -->
+        <div class="blog-list">
+            <table class="table table-bordered blog-table">
+                <thead class="thead-dark">
+                    <tr>
+                        <th scope="col">Title</th>
+                        <th scope="col">Category</th>
+                        <th scope="col">Visibility</th>
+                        <th scope="col">Pinned</th>
+                        <th scope="col">Creation Time</th>
+                        <th scope="col">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% blogs.forEach(blog => { %>
+                    <tr>
+                        <td><%= blog.title %></td>
+                        <td><%= blog.category.title %></td>
+                        <td><%= blog.isPublic ? 'Public' : 'Private' %></td>
+                        <td><%= blog.isTop ? 'Yes' : 'No' %></td>
+                        <td><%= blog.createdAt.toLocaleString() %></td>
+                        <td>
+                            <form action="/admin/blogs/<%= blog._id %>/toggle-public" method="POST" style="display: inline;">
+                                <button type="submit" class="btn btn-sm <%= blog.isPublic ? 'btn-success' : 'btn-secondary' %>">
+                                    <%= blog.isPublic ? 'Hide' : 'Show' %>
+                                </button>
+                            </form>
+                            <form action="/admin/blogs/<%= blog._id %>/toggle-top" method="POST" style="display: inline;">
+                                <button type="submit" class="btn btn-sm <%= blog.isTop ? 'btn-success' : 'btn-secondary' %>">
+                                    <%= blog.isTop ? 'Unpin' : 'Pin' %>
+                                </button>
+                            </form>
+                            <button class="btn btn-sm btn-info" data-toggle="modal" data-target="#blogModal"
+                                data-id="<%= blog._id %>" data-title="<%= blog.title %>"
+                                data-category="<%= blog.category._id %>" data-content="<%= blog.content %>" 
+                                data-ispublic="<%= blog.isPublic %>" data-istop="<%= blog.isTop %>">Edit</button>
+                            <form action="/admin/blogs/<%= blog._id %>/delete" method="POST" style="display: inline;">
+                                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+
+            <!-- Pagination -->
+            <nav aria-label="Page navigation example">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item <%= currentPage == 1 ? 'disabled' : '' %>">
+                        <a class="page-link" href="?page=<%= currentPage - 1 %>" tabindex="-1" aria-disabled="true">Previous</a>
+                    </li>
+                    <% for (let i = 1; i <= totalPages; i++) { %>
+                    <li class="page-item <%= currentPage == i ? 'active' : '' %>">
+                        <a class="page-link" href="?page=<%= i %>">
+                            <%= i %>
+                        </a>
+                    </li>
+                    <% } %>
+                    <li class="page-item <%= currentPage == totalPages || blogs.length === 0 ? 'disabled' : '' %>">
+                        <a class="page-link" href="?page=<%= currentPage + 1 %>">Next</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Add/Edit Blog Modal -->
+    <div class="modal fade" id="blogModal" tabindex="-1" aria-labelledby="blogModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="blogForm" action="/admin/blogs" method="POST">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="blogModalLabel">Add Blog</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="blogTitle">Title</label>
+                            <input type="text" class="form-control" id="blogTitle" name="title" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="content">Content</label>
+                            <textarea class="form-control" id="content" name="content" rows="5" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="blogCategory">Category</label>
+                            <select class="form-control" id="blogCategory" name="category" required>
+                                <% if (!categories || categories.length === 0) { %>
+                                <option value="" disabled>No categories available</option>
+                                <% } else { %>
+                                <% categories.forEach(category => { %>
+                                <option value="<%= category._id %>"><%= category.title %></option>
+                                <% }); %>
+                                <% } %>
+                            </select>
+                        </div>
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="blogIsPublic" name="isPublic" value="true" checked>
+                            <label class="form-check-label" for="blogIsPublic">Public</label>
+                        </div>
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="blogIsTop" name="isTop" value="true">
+                            <label class="form-check-label" for="blogIsTop">Pin</label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JavaScript and jQuery -->
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/popper.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script>
+        $('#blogModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget); // Button that triggered the modal
+            var id = button.data('id'); // Get blog ID from button
+            var title = button.data('title'); // Get blog title from button
+            var content = button.data('content'); // Get blog content from button
+            var category = button.data('category'); // Get blog category ID from button
+            var isPublic = button.data('ispublic'); // Get blog visibility from button
+            var isTop = button.data('istop'); // Get blog pin status from button
+
+            var modal = $(this);
+            if (id) {
+                modal.find('.modal-title').text('Edit Blog');
+                modal.find('#blogForm').attr('action', '/admin/blogs/' + id);
+                modal.find('#blogTitle').val(title);
+                modal.find('#content').val(content); 
+                modal.find('#blogCategory').val(category);
+                modal.find('#blogIsPublic').prop('checked', isPublic);
+                modal.find('#blogIsTop').prop('checked', isTop);
+            } else {
+                modal.find('.modal-title').text('Add Blog');
+                modal.find('#blogForm').attr('action', '/admin/blogs');
+                modal.find('#blogTitle').val('');
+                modal.find('#content').val('');
+                modal.find('#blogCategory').val('<%= categories.length > 0 ? categories[0]._id : "" %>'); // Default to first category
+                modal.find('#blogIsPublic').prop('checked', true); // Default checked
+                modal.find('#blogIsTop').prop('checked', false); // Default not pinned
+            }
+        });
+
+        $('#blogModal').on('hidden.bs.modal', function () {
+            var modal = $(this);
+            modal.find('.modal-title').text('Add Blog');
+            modal.find('#blogForm').attr('action', '/admin/blogs');
+            modal.find('#blogTitle').val('');
+            modal.find('#content').val('');
+            modal.find('#blogCategory').val('<%= categories.length > 0 ? categories[0]._id : "" %>'); // Default to first category
+            modal.find('#blogIsPublic').prop('checked', true); // Default checked
+            modal.find('#blogIsTop').prop('checked', false); // Default not pinned
+        });
+    </script>
+    
+</body>
+
+</html>

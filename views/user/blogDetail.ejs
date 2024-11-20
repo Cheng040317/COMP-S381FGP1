@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Blog Details</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/bootstrap-icons.css">
+    <style>
+        .container {
+            margin-top: 50px;
+        }
+
+        .blog-details {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .comment-list {
+            margin-top: 20px;
+        }
+
+        .comment-list .card {
+            margin-bottom: 10px;
+        }
+
+        .comment-form {
+            margin-top: 20px;
+        }
+
+        .navbar {
+            background-color: #343a40;
+        }
+
+        .navbar-brand,
+        .navbar-nav .nav-link {
+            color: #ffffff;
+        }
+
+        .link-list {
+            margin-top: 20px;
+        }
+
+        .link-table th,
+        .link-table td {
+            vertical-align: middle;
+        }
+
+        .footer {
+            background-color: #343a40;
+            color: white;
+            padding: 10px 0;
+            text-align: center;
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+        }
+
+        .footer a {
+            color: #f8f9fa;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+
+    <%- include('./header.ejs') %>
+
+    <div class="container" style="min-height: 800px; margin-bottom: 30px;">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="blog-details">
+                    <h2><%= blog.title %></h2>
+                    <p><%= blog.content %></p>
+                    <p>Category: <%= blog.category.title %></p>
+                    <p>Visibility: <%= blog.isPublic ? 'Public' : 'Private' %></p>
+                    <p>Pinned: <%= blog.isTop ? 'Yes' : 'No' %></p>
+                    <p>Created At: <%= blog.createdAt.toLocaleString() %></p>
+                    <p>Views: <%= blog.views %></p>
+
+                    <!-- Favorite Button -->
+                    <% if (user) { %>
+                        <% if (isFavorited) { %>
+                            <form action="/blogs/<%= blog._id %>/unfavorite" method="POST">
+                                <button type="submit" class="btn btn-danger"><i class="bi bi-heart-fill"></i> Unfavorite</button>
+                            </form>
+                        <% } else { %>
+                            <form action="/blogs/<%= blog._id %>/favorite" method="POST">
+                                <button type="submit" class="btn btn-primary"><i class="bi bi-heart"></i> Favorite</button>
+                            </form>
+                        <% } %>
+                    <% } %>
+                </div>
+
+                <!-- Comment List -->
+                <div class="comment-list">
+                    <h3>Comments</h3>
+                    <% if (comments.length > 0) { %>
+                        <% comments.forEach(comment => { %>
+                            <div class="card">
+                                <div class="card-body">
+                                    <p><%= comment.content %></p>
+                                    <p>Comment By: <%= comment.user.username %></p>
+                                    <p>Commented At: <%= comment.createdAt.toLocaleString() %></p>
+                                </div>
+                            </div>
+                        <% }); %>
+                    <% } else { %>
+                        <p>No comments yet</p>
+                    <% } %>
+
+                    <!-- Pagination -->
+                    <nav aria-label="Page navigation example">
+                        <ul class="pagination">
+                            <% if (currentPage > 1) { %>
+                                <li class="page-item">
+                                    <a class="page-link" href="/blogs/<%= blog._id %>?page=<%= currentPage - 1 %>">Previous</a>
+                                </li>
+                            <% } %>
+                            <% for (let i = 1; i <= totalPages; i++) { %>
+                                <li class="page-item <%= currentPage == i ? 'active' : '' %>">
+                                    <a class="page-link" href="/blogs/<%= blog._id %>?page=<%= i %>"><%= i %></a>
+                                </li>
+                            <% } %>
+                            <% if (currentPage < totalPages) { %>
+                                <li class="page-item">
+                                    <a class="page-link" href="/blogs/<%= blog._id %>?page=<%= currentPage + 1 %>">Next</a>
+                                </li>
+                            <% } %>
+                        </ul>
+                    </nav>
+                </div>
+
+                <!-- Comment Form -->
+                <% if (user) { %>
+                    <div class="comment-form">
+                        <h3>Post a Comment</h3>
+                        <form action="/blogs/<%= blog._id %>/comments" method="POST">
+                            <div class="form-group">
+                                <textarea class="form-control" name="content" rows="3" placeholder="Enter your comment" required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Submit Comment</button>
+                        </form>
+                    </div>
+                <% } else { %>
+                    <p>Please log in to comment.</p>
+                <% } %>
+            </div>            
+        </div>
+    </div>
+
+    <%- include('./footer.ejs') %>
+
+    <!-- Bootstrap JavaScript and jQuery -->
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/popper.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+</body>
+
+</html>

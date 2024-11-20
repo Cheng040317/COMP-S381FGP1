@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>My Comments</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <style>
+        .container {
+            margin-top: 50px;
+        }
+
+        .comment-list {
+            margin-top: 20px;
+        }
+
+        .comment-list .card {
+            margin-bottom: 20px;
+        }
+
+        .navbar {
+            background-color: #343a40;
+        }
+
+        .navbar-brand,
+        .navbar-nav .nav-link {
+            color: #ffffff;
+        }
+    </style>
+</head>
+
+<body>
+    <%- include('./header.ejs') %>
+    <div class="container" style="min-height: 800px;">
+        <h2 class="mt-4">My Comments</h2>
+        <div class="comment-list">
+            <% if (comments.length > 0) { %>
+                <% comments.forEach(comment => { %>
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title"><%= comment.blog.title %></h5>
+                            <p class="card-text"><%= comment.content %></p>
+                            <p>Commented At: <%= comment.createdAt.toLocaleString() %></p>
+                            <form action="/my-comments/<%= comment._id %>/delete" method="POST" class="d-inline">
+                                <button type="submit" class="btn btn-danger">Delete Comment</button>
+                            </form>
+                            <button class="btn btn-warning edit-comment" data-id="<%= comment._id %>" data-content="<%= comment.content %>">Edit Comment</button>
+                        </div>
+                    </div>
+                <% }) %>
+                <!-- Pagination -->
+                <nav aria-label="Page navigation example">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item <%= currentPage == 1 ? 'disabled' : '' %>">
+                            <a class="page-link" href="?page=<%= currentPage - 1 %>" tabindex="-1">Previous</a>
+                        </li>
+                        <% for (let i = 1; i <= totalPages; i++) { %>
+                            <li class="page-item <%= currentPage == i ? 'active' : '' %>">
+                                <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                            </li>
+                        <% } %>
+                        <li class="page-item <%= currentPage == totalPages ? 'disabled' : '' %>">
+                            <a class="page-link" href="?page=<%= currentPage + 1 %>">Next</a>
+                        </li>
+                    </ul>
+                </nav>
+            <% } else { %>
+                <p>No comments yet</p>
+            <% } %>
+        </div>
+    </div>
+
+    <!-- Edit Comment Modal -->
+    <div class="modal fade" id="editCommentModal" tabindex="-1" aria-labelledby="editCommentModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editCommentModalLabel">Edit Comment</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="editCommentForm" method="POST">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <textarea class="form-control" name="content" id="editCommentContent" rows="3" required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <%- include('./footer.ejs') %>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="/js/popper.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('.edit-comment').on('click', function () {
+                const commentId = $(this).data('id');
+                const commentContent = $(this).data('content');
+                $('#editCommentContent').val(commentContent);
+                $('#editCommentForm').attr('action', '/my-comments/' + commentId + '/edit');
+                $('#editCommentModal').modal('show');
+            });
+        });
+    </script>
+</body>
+
+</html>

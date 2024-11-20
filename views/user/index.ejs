@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Blog Homepage</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <style>
+        .container {
+            margin-top: 50px;
+        }
+
+        .blog-list {
+            margin-top: 20px;
+        }
+
+        .blog-list .card {
+            margin-bottom: 20px;
+        }
+
+        .navbar {
+            background-color: #343a40;
+        }
+
+        .navbar-brand,
+        .navbar-nav .nav-link {
+            color: #ffffff;
+        }
+
+        .link-list {
+            margin-top: 20px;
+        }
+
+        .link-table th,
+        .link-table td {
+            vertical-align: middle;
+        }
+
+        .empty-state {
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        .empty-state img {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+
+<body>
+
+    <%- include('./header.ejs') %>
+    <div class="container" style="min-height: 800px;">
+        <div class="row">
+            <div class="col-md-8">
+                <h2>Blog List</h2>
+
+                <!-- Blog Categories -->
+                <ul class="nav nav-pills mb-3" id="categories" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">
+                            All
+                        </a>
+                    </li>
+                    <% categories.forEach(category => { %>
+                    <li class="nav-item">
+                        <a class="nav-link <%= category.isActive ? 'active' : '' %>"
+                            id="category<%= category._id %>" href="/?category=<%= category._id %>">
+                            <%= category.title %>
+                        </a>
+                    </li>
+                    <% }); %>
+                </ul>
+
+                <!-- Blog List -->
+                <div class="blog-list">
+                    <% if (blogs.length > 0) { %>
+                    <% blogs.forEach(blog => { %>
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <%= blog.title %>
+                            </h5>
+                            <p class="card-text">
+                                <%= blog.content.substring(0, 150) %>...
+                            </p>
+                            <a href="/blogs/<%= blog._id %>" class="btn btn-primary">Read More</a>
+                        </div>
+                    </div>
+                    <% }); %>
+                    <% } else { %>
+                    <div class="empty-state">
+                        <img src="/images/empty-state.svg" alt="Empty State">
+                        <h3>No Blog Content Available in This Category</h3>
+                        <p>Please check back later or choose another category to browse.</p>
+                    </div>
+                    <% } %>
+
+                    <!-- Pagination -->
+                    <nav aria-label="Page navigation example">
+                        <ul class="pagination">
+                            <% if (currentPage > 1) { %>
+                            <li class="page-item">
+                                <a class="page-link" href="/blogs?page=<%= currentPage - 1 %>">Previous</a>
+                            </li>
+                            <% } %>
+                            <% for (let i = 1; i <= totalPages; i++) { %>
+                            <li class="page-item <%= currentPage == i ? 'active' : '' %>">
+                                <a class="page-link" href="/blogs?page=<%= i %>">
+                                    <%= i %>
+                                </a>
+                            </li>
+                            <% } %>
+                            <% if (currentPage < totalPages) { %>
+                            <li class="page-item">
+                                <a class="page-link" href="/blogs?page=<%= currentPage + 1 %>">Next</a>
+                            </li>
+                            <% } %>
+                        </ul>
+                    </nav>
+                </div>
+            </div>            
+        </div>
+    </div>
+    <%- include('./footer.ejs') %>
+    <!-- Bootstrap JavaScript and jQuery -->
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/popper.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+</body>
+
+</html>
